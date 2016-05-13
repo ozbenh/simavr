@@ -376,6 +376,8 @@ hd44780_init(
 	b->avr = avr;
 	b->w = width;
 	b->h = height;
+	hd44780_set_flag(b, HD44780_FLAG_D_L, 1);
+
 	/*
 	 * Register callbacks on all our IRQs
 	 */
