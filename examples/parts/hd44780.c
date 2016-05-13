@@ -107,7 +107,7 @@ hd44780_write_data(
 {
 	uint32_t delay = 37; // uS
 	b->vram[b->cursor] = b->datapins;
-	printf("hd44780_write_data %02x\n", b->datapins);
+	//printf("hd44780_write_data %02x\n", b->datapins);
 	if (hd44780_get_flag(b, HD44780_FLAG_S_C)) {	// display shift ?
 		// TODO display shift
 	} else {
@@ -130,7 +130,7 @@ hd44780_write_command(
 		if (b->datapins & (1 << top))
 			break;
 		else top--;
-	printf("hd44780_write_command %02x\n", b->datapins);
+	//printf("hd44780_write_command %02x (%d)\n", b->datapins, top);
 
 	switch (top) {
 		// Set	DDRAM address
