@@ -116,6 +116,7 @@ typedef struct avr_adc_t {
 	avr_regbit_t 	aden;		// ADC Enabled
 	avr_regbit_t 	adsc;		// ADC Start Conversion
 	avr_regbit_t 	adate;		// ADC Auto Trigger Enable
+	avr_regbit_t 	adfr;		// ADC Free running
 
 	avr_regbit_t	adps[3];	// Prescaler bits. Note that it's a frequency bit shift
 

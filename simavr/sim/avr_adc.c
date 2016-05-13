@@ -194,7 +194,8 @@ avr_adc_configure_trigger(
 		}
 	} else {
 		// TODO: remove previously configured auto triggers
-		p->adts_mode = avr_adts_none;
+		if (!avr_regbit_get(avr, p->adfr))
+			p->adts_mode = avr_adts_none;
 	}
 	
 	if( old_adts != p->adts_mode )
@@ -214,6 +215,12 @@ avr_adc_write_adcsra(
 
 	avr->data[p->adsc.reg] = v;
 
+	/* above avr_adc_configure_trigger will have cleared the mode,
+	 * we fix it up here
+	 */
+	if (avr_regbit_get(avr, p->adfr))
+		p->adts_mode = avr_adts_free_running;
+
 	// can't write zero to adsc
 	if (adsc && !avr_regbit_get(avr, p->adsc)) {
 		avr_regbit_set(avr, p->adsc);
@@ -221,7 +228,7 @@ avr_adc_write_adcsra(
 	}
 	if (!aden && avr_regbit_get(avr, p->aden)) {
 		// first conversion
-		p->first = 1;
+		p->first = 1; 
 		AVR_LOG(avr, LOG_TRACE, "ADC: Start AREF %d AVCC %d\n", avr->aref, avr->avcc);
 	}
 	if (aden && !avr_regbit_get(avr, p->aden)) {
@@ -277,7 +284,7 @@ avr_adc_irq_notify(
 			p->temp = value;
 		}	break;
 		case ADC_IRQ_IN_TRIGGER: {
-			if (avr_regbit_get(avr, p->adate)) {
+			if (avr_regbit_get(avr, p->adate) | avr_regbit_get(avr, p->adfr)) {
 				// start a conversion only if it's not running
 				// otherwise ignore the trigger
 				if(!avr_regbit_get(avr, p->adsc) ) {

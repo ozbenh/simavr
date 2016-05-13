@@ -143,6 +143,7 @@ const struct mcu_t SIM_CORENAME = {
 		// no ADATE .adate = AVR_IO_REGBIT(ADCSRA, ADATE),
 		.adps = { AVR_IO_REGBIT(ADCSRA, ADPS0), AVR_IO_REGBIT(ADCSRA, ADPS1), AVR_IO_REGBIT(ADCSRA, ADPS2),},
 
+		.adfr = AVR_IO_REGBIT(ADCSRA, 5),
 		.r_adch = ADCH,
 		.r_adcl = ADCL,
 
