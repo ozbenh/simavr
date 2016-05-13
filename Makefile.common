@@ -157,7 +157,7 @@ endif
 	@part=${<} ; part=$${part/_*}; \
 	${AVR}gcc -Wall -gdwarf-2 -Os -std=gnu99 \
 			-mmcu=$$part \
-			-DF_CPU=8000000 \
+			-DF_CPU=8000000 -DSIMAVR_BUILD \
 			-fno-inline-small-functions \
 			-ffunction-sections -fdata-sections \
 			-Wl,--relax,--gc-sections \
