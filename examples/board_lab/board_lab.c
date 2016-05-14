@@ -221,7 +221,6 @@ static void wave_trigger_hook(struct avr_irq_t * irq, uint32_t value, void * par
 	}
 
 	millivolts = (sample * wave_mult) + wave_offset;
-	printf("%dmV\n", millivolts);
 	avr_raise_irq(wirqs + IRQ_WAVE_VALUE_OUT, millivolts);
 }
 
@@ -434,10 +433,10 @@ int main(int argc, char *argv[])
 	/* Init and setup AVR */
 	create_avr(fname, use_gdb, gdb_port);
 
-	/* Scale to 4500mV */
-	wave_mult = 4500.0;
-	/* Add a 200mV offset */
-	wave_offset = 200.0;
+	/* Scale to 2400mV */
+	wave_mult = 2400.0;
+	/* Add a 2000mV offset */
+	wave_offset = 2000.0;
 
 	/* Load wave */
 	load_wave(wname);
