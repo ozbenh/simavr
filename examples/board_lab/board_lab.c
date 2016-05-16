@@ -79,6 +79,7 @@ avr_irq_t *wirqs;
 avr_cycle_count_t wave_start_cycle;
 uint32_t wave_adc_mux_number;
 bool wave_playing;
+bool vcd_started;
 
 static void *
 avr_run_thread(
@@ -94,16 +95,25 @@ void keyCB(unsigned char key, int x, int y)
 {
 	switch (key) {
 	case 'q':
-		avr_vcd_stop(&vcd_file);
+		if (vcd_started) {
+			vcd_started = false;
+			avr_vcd_stop(&vcd_file);
+		}
 		exit(0);
 		break;
 	case 'r':
 		printf("Starting VCD trace; press 's' to stop\n");
-		avr_vcd_start(&vcd_file);
+		if (!vcd_started) {
+			avr_vcd_start(&vcd_file);
+			vcd_started = true;
+		}
 		break;
 	case 's':
 		printf("Stopping VCD trace\n");
-		avr_vcd_stop(&vcd_file);
+		if (vcd_started) {
+			vcd_started = false;
+			avr_vcd_stop(&vcd_file);
+		}
 		break;
 	case 'p':
 		printf("Starting wave play\n");
@@ -339,7 +349,7 @@ static void setup_lcd(void)
 
 static void setup_vcd(void)
 {
-	avr_vcd_init(avr, "gtkwave_output.vcd", &vcd_file, 10 /* usec */);
+	avr_vcd_init(avr, "gtkwave_output.vcd", &vcd_file, 1 /* usec */);
 	avr_vcd_add_signal(&vcd_file,
 			avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ('D'), IOPORT_IRQ_PIN_ALL),
 			8 /* bits */, "D7-D0");
@@ -361,8 +371,17 @@ static void setup_vcd(void)
 	avr_vcd_add_signal(&vcd_file,
 			hd44780.irq + IRQ_HD44780_DATA_OUT,
 			8 /* bits */, "LCD_DATA_OUT");
-
+	avr_vcd_add_signal(&vcd_file,
+			avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ('B'), 0),
+			1 /* bits */, "RED_LED");
+	avr_vcd_add_signal(&vcd_file,
+			avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ('B'), 1),
+			1 /* bits */, "GREEN_LED");
+	avr_vcd_add_signal(&vcd_file,
+			avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ('B'), 2),
+			1 /* bits */, "PB2");
 	avr_vcd_start(&vcd_file);
+	vcd_started = true;
 }
 
 static void setup_display(void)
