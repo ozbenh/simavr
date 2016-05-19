@@ -411,16 +411,24 @@ int main(int argc, char *argv[])
 	 */
 	glutInit(&argc, argv);
 
+	/* Default scale: 2200mV */
+	wave_mult = 2200.0;
+	/* Defaukt offset: 2000mV */
+	wave_offset = 2000.0;
+
+
 	while(1) {
 		static struct option long_opts[] = {
 			{"wave",	required_argument,	NULL,	'w'},
 			{"firmware",	required_argument,	NULL,	'f'},
+			{"offset",	required_argument,	NULL,	'o'},
+			{"scale",	required_argument,	NULL,	's'},
 			{"gdb",		optional_argument,	NULL,	'g'},
 			{"help",	no_argument,		NULL,	'h'},
 		};
 		int c, oidx = 0;
 
-		c = getopt_long(argc, argv, "w:f:g::h", long_opts, &oidx);
+		c = getopt_long(argc, argv, "w:f:o:s:g::h", long_opts, &oidx);
 		if (c == EOF)
 			break;
 		switch(c) {
@@ -429,6 +437,12 @@ int main(int argc, char *argv[])
 			break;
 		case 'f':
 			fname = optarg;
+			break;
+		case 'o':
+			wave_offset = (double)atoi(optarg);
+			break;
+		case 's':
+			wave_mult =  (double)atoi(optarg);
 			break;
 		case 'g':
 			use_gdb = true;
@@ -441,6 +455,8 @@ int main(int argc, char *argv[])
 			printf("Options:\n");
 			printf("  -w, --wave=file.txt     specify wave text file\n");
 			printf("  -f, --firmware=file.axf specify firmware file\n");
+			printf("  -o, --offset=<value>    specify voltage offset in mV (default 2000)\n");
+			printf("  -s, --scale=<value>     specify voltage scale in mV (default 2200)\n");
 			printf("  -g, --gdb[=port]        enable GDB support on port \"port\" (default to 1234)\n");
 			printf("  -h, --help              this help\n\n");
 			printf("Additional standard GL/X11 options are supported\n\n");
@@ -449,13 +465,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	printf("Wave adjustement: offset=%fmV, scale=%fmV\n", wave_offset, wave_mult);
+
 	/* Init and setup AVR */
 	create_avr(fname, use_gdb, gdb_port);
-
-	/* Scale to 2400mV */
-	wave_mult = 2400.0;
-	/* Add a 2000mV offset */
-	wave_offset = 2000.0;
 
 	/* Load wave */
 	load_wave(wname);
@@ -483,6 +496,9 @@ int main(int argc, char *argv[])
 		       gdb_port);
 
 	pthread_create(&run, NULL, avr_run_thread, NULL);
+
+	wave_start_cycle = avr->cycle;
+	wave_playing = true;
 
 	glutMainLoop();
 }
